@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: packages/solid/package-lock.json
+
+      - name: Install dependencies
+        working-directory: packages/solid
+        run: npm ci
+
+      - name: Run type check
+        working-directory: packages/solid
+        run: npm run type-check
+
+      - name: Run tests
+        working-directory: packages/solid
+        run: npm test
