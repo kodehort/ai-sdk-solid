@@ -17,16 +17,17 @@ const app = new Hono();
 app.use('/*', cors());
 
 
-app.post('/api/chat', async (req: Request): Promise<Response> => {
-  const body = await req.json();
+app.post('/api/chat', async c => {
+  const body = await c.req.json();
 
   let messages: UIMessage[];
 
   try {
     messages = await validateUIMessages({
-      messages: body.messages,
+      messages: body.messages ?? [],
     });
   } catch (error) {
+    console.log(error)
     return new Response('Invalid messages', { status: 400 });
   }
 
