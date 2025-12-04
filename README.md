@@ -1,1 +1,1 @@
-# ai-sdk/solid
+# ai-solid
