@@ -208,7 +208,13 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
       return getChat().clearError;
     },
     get stop() {
-      return getChat().stop;
+      const chat = getChat();
+      return async () => {
+        await chat.stop();
+        // Force status to 'ready' for immediate UI update
+        // AbstractChat.stop() aborts the stream but callback may not fire reliably
+        setStatus('ready');
+      };
     },
     get error() {
       // Trigger reactivity check for chat recreation

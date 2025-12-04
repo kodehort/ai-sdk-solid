@@ -22,17 +22,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: packages/solid/package-lock.json
+          cache: "npm"
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: packages/solid
         run: npm ci
 
       - name: Run type check
-        working-directory: packages/solid
         run: npm run type-check
 
       - name: Run tests
-        working-directory: packages/solid
         run: npm test

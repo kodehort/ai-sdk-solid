@@ -1662,7 +1662,7 @@ describe('should send message with attachments', () => {
   });
 });
 
-describe.skip('regenerate', () => {
+describe('regenerate', () => {
   setupTestComponent(() => {
     const chat = useChat({
       generateId: mockId(),
@@ -1670,6 +1670,7 @@ describe.skip('regenerate', () => {
 
     return (
       <div>
+        <div data-testid="status">{chat.status}</div>
         <For each={chat.messages}>
           {(m, idx) => (
             <div data-testid={`message-${idx()}`}>
@@ -1736,10 +1737,17 @@ describe.skip('regenerate', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('message-1')).toBeInTheDocument();
+      expect(screen.getByTestId('message-1')).toHaveTextContent(
+        'AI: first response',
+      );
     });
 
-    // setup done, click reload:
+    // Wait for stream to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('status')).toHaveTextContent('ready');
+    });
+
+    // first response complete, click regenerate:
     await userEvent.click(screen.getByTestId('do-regenerate'));
 
     await waitFor(() => {
@@ -1979,14 +1987,14 @@ describe('stop', () => {
           }}
         />
 
-        <button data-testid="do-stop" onClick={chat.stop} />
+        <button data-testid="do-stop" onClick={() => chat.stop()} />
 
         <p data-testid="status">{chat.status}</p>
       </div>
     );
   });
 
-  it.skip('should show stop response', async () => {
+  it('should show stop response', async () => {
     const controller = new TestResponseController();
 
     server.urls['/api/chat'].response = {
@@ -2013,10 +2021,7 @@ describe('stop', () => {
     });
 
     // After stop, the stream is aborted - the message should show partial content
-    await waitFor(() => {
-      expect(screen.getByTestId('message-1')).toHaveTextContent('AI: Hello');
-      expect(screen.getByTestId('status')).toHaveTextContent('ready');
-    });
+    expect(screen.getByTestId('message-1')).toHaveTextContent('AI: Hello');
   });
 });
 
