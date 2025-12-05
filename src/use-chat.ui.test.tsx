@@ -2030,7 +2030,7 @@ describe('experimental_throttle', () => {
 
   setupTestComponent(() => {
     const chat = useChat({
-      experimental_throttle: throttleMs,
+      throttle: throttleMs,
       generateId: mockId(),
     });
 
