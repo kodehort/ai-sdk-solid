@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from 'solid-js';
-import { experimental_useObject } from 'ai-solid';
+import { useObject } from 'ai-solid';
 import { z } from 'zod';
 
 const analysisSchema = z.object({
@@ -14,7 +14,7 @@ type Analysis = z.infer<typeof analysisSchema>;
 export default function StructuredObject() {
   const [input, setInput] = createSignal('');
 
-  const analyzer = experimental_useObject<Analysis, { content: string }>({
+  const analyzer = useObject<Analysis, { content: string }>({
     api: '/api/analyze',
     schema: analysisSchema,
   });

@@ -10,6 +10,7 @@
         "throttleit": "2.1.0",
       },
       "devDependencies": {
+        "@ai-sdk/test-server": "^1.0.0-beta.1",
         "@solidjs/testing-library": "^0.8.10",
         "@testing-library/jest-dom": "^6.6.3",
         "@testing-library/user-event": "^14.6.1",
@@ -39,6 +40,8 @@
     "@ai-sdk/provider": ["@ai-sdk/provider@2.0.0", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA=="],
 
     "@ai-sdk/provider-utils": ["@ai-sdk/provider-utils@3.0.18", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@standard-schema/spec": "^1.0.0", "eventsource-parser": "^3.0.6" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-ypv1xXMsgGcNKUP+hglKqtdDuMg68nWHucPPAhIENrbFAI+xCHiqPVN8Zllxyv1TNZwGWUghPxJXU+Mqps0YRQ=="],
+
+    "@ai-sdk/test-server": ["@ai-sdk/test-server@1.0.0-beta.1", "", {}, "sha512-LMbCb7o0LOVRsq3JN+I21stGg00HafXKachB86P1EiC/hiWCgxHIkttBl6IkxhMHrZX9B3MqxDtK1RRrnBMc4A=="],
 
     "@asamuzakjp/css-color": ["@asamuzakjp/css-color@4.1.0", "", { "dependencies": { "@csstools/css-calc": "^2.1.4", "@csstools/css-color-parser": "^3.1.0", "@csstools/css-parser-algorithms": "^3.0.5", "@csstools/css-tokenizer": "^3.0.4", "lru-cache": "^11.2.2" } }, "sha512-9xiBAtLn4aNsa4mDnpovJvBn72tNEIACyvlqaNJ+ADemR+yeMJWnBudOi2qGDviJa7SwcDOU/TRh5dnET7qk0w=="],
 
