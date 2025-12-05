@@ -23,7 +23,7 @@
     "lint": "eslint \"./**/*.ts*\"",
     "test": "NODE_OPTIONS='--no-warnings' vitest --run",
     "test:watch": "NODE_OPTIONS='--no-warnings' vitest",
-    "type-check": "tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/provider-utils": "^3.0.0-beta.11",

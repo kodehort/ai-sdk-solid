@@ -2,9 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
 
 jobs:
   test:
@@ -21,7 +21,7 @@ jobs:
         run: bun install
 
       - name: Run type check
-        run: bun run type-check
+        run: bun run typecheck
 
       - name: Run tests
-        run: bun test
+        run: bun run test
