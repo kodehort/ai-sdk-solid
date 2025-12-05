@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from 'solid-js';
-import { useObject } from 'ai-solid';
+import { useObject } from 'ai-sdk-solid';
 import { z } from 'zod';
 
 const analysisSchema = z.object({

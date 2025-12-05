@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from 'solid-js';
-import { useChat } from 'ai-solid';
+import { useChat } from 'ai-sdk-solid';
 
 export default function Chat() {
   const [input, setInput] = createSignal('');

@@ -1,5 +1,5 @@
 import { Show } from 'solid-js';
-import { useCompletion } from 'ai-solid';
+import { useCompletion } from 'ai-sdk-solid';
 
 export default function Completion() {
   const completion = useCompletion({ api: '/api/completion' });
