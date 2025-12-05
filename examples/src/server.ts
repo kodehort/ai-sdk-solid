@@ -49,12 +49,16 @@ app.post('/api/chat', async c => {
 app.post('/api/completion', async c => {
   const { prompt } = await c.req.json();
 
-  const result = streamText({
+  const streamTextResult = streamText({
     model: anthropic('claude-3-5-haiku-latest'),
     prompt,
   });
 
-  return result.toTextStreamResponse();
+  const stream = streamTextResult.toUIMessageStream();
+
+  return createUIMessageStreamResponse({
+    stream,
+  });
 });
 
 const analysisSchema = z.object({

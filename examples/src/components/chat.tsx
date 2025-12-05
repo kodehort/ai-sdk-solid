@@ -11,10 +11,7 @@ export default function Chat() {
     if (!content) return;
 
     setInput('');
-    await chat.sendMessage({
-      role: 'user',
-      parts: [{ text: content, type: 'text' }],
-    });
+    await chat.sendMessage({ text: content });
   };
 
   return (
