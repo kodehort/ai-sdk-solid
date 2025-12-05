@@ -1,22 +1,17 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Overview
-
-SolidJS bindings for the Vercel AI SDK. Provides reactive hooks (`useChat`, `useCompletion`, `experimental_useObject`) for building AI-powered chat/completion UIs with SolidJS.
+SolidJS bindings for the Vercel AI SDK. Provides reactive hooks (`useChat`, `useCompletion`, `useObject`) for building AI-powered chat/completion UIs with SolidJS.
 
 ## Commands
 
 ```bash
-npm run build       # Build with tsup
-npm run test        # Run tests (vitest)
-npm run test:watch  # Watch mode
-npm run type-check  # TypeScript check
-npm run lint        # ESLint
+bun run build       # Build with tsup
+bun run test        # Run tests (vitest)
+bun run test:watch  # Watch mode
+bun run typecheck   # TypeScript check
 ```
 
-Single test: `npx vitest run src/use-chat.ui.test.tsx`
+Single test: `bun vitest run src/use-chat.ui.test.tsx`
 
 ## Architecture
 
@@ -30,4 +25,4 @@ Pattern: hooks return objects with getter properties wrapping signals for reacti
 
 ## Testing
 
-Tests use `@solidjs/testing-library` + msw for mocking. Test files: `*.ui.test.tsx`. Test server helper in `src/test-utils/test-server.ts`.
+Tests use `@solidjs/testing-library` + `@ai-sdk/test-server` for mocking. Test files: `*.ui.test.tsx`.

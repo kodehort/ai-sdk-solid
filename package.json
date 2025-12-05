@@ -20,7 +20,6 @@
     "build": "tsup",
     "clean": "rm -rf dist",
     "dev": "tsup --watch",
-    "lint": "eslint \"./**/*.ts*\"",
     "test": "NODE_OPTIONS='--no-warnings' vitest --run",
     "test:watch": "NODE_OPTIONS='--no-warnings' vitest",
     "typecheck": "tsc --noEmit"
