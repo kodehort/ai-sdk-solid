@@ -3,8 +3,8 @@
 import {
   createTestServer,
   TestResponseController,
-  mockId,
-} from './test-utils/test-server';
+} from '@ai-sdk/test-server/with-vitest';
+import { mockId } from '@ai-sdk/provider-utils/test';
 import '@testing-library/jest-dom/vitest';
 import { screen, waitFor } from '@solidjs/testing-library';
 import userEvent from '@testing-library/user-event';
@@ -406,6 +406,7 @@ describe('text stream', () => {
 
     return (
       <div>
+        <div data-testid="status">{chat.status}</div>
         <For each={chat.messages}>
           {(m, idx) => (
             <div data-testid={`message-${idx()}-text-stream`}>
@@ -483,6 +484,11 @@ describe('text stream', () => {
       expect(screen.getByTestId('message-1-content')).toHaveTextContent('Hello');
     });
     expect(screen.getByTestId('message-1-id').textContent).toBe(id);
+
+    // Wait for stream processing to complete (status becomes 'ready')
+    await waitFor(() => {
+      expect(screen.getByTestId('status')).toHaveTextContent('ready');
+    });
   });
 
   it('should invoke onFinish when the stream finishes', async () => {
@@ -493,7 +499,10 @@ describe('text stream', () => {
 
     await userEvent.click(screen.getByTestId('do-send'));
 
-    await screen.findByTestId('message-1-text-stream');
+    // Wait for stream processing to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('status')).toHaveTextContent('ready');
+    });
 
     expect(onFinishCalls).toMatchInlineSnapshot(`
       [
@@ -512,7 +521,7 @@ describe('text stream', () => {
               {
                 "providerMetadata": undefined,
                 "state": "done",
-                "text": "Hello",
+                "text": "Hello, world.",
                 "type": "text",
               },
             ],
@@ -540,7 +549,7 @@ describe('text stream', () => {
                 {
                   "providerMetadata": undefined,
                   "state": "done",
-                  "text": "Hello",
+                  "text": "Hello, world.",
                   "type": "text",
                 },
               ],

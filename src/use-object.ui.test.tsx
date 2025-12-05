@@ -1,12 +1,12 @@
 import {
   createTestServer,
   TestResponseController,
-} from './test-utils/test-server';
+} from '@ai-sdk/test-server/with-vitest';
 import '@testing-library/jest-dom/vitest';
 import { cleanup, render, screen, waitFor } from '@solidjs/testing-library';
 import userEvent from '@testing-library/user-event';
 import { z } from 'zod';
-import { experimental_useObject } from './use-object';
+import { useObject } from './use-object';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 const server = createTestServer({
@@ -24,7 +24,7 @@ describe('text stream', () => {
     headers?: Record<string, string> | Headers;
     credentials?: RequestCredentials;
   }) => {
-    const objectHelper = experimental_useObject({
+    const objectHelper = useObject({
       api: '/api/use-object',
       schema: z.object({ content: z.string() }),
       onError(error) {

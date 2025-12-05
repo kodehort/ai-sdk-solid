@@ -21,8 +21,8 @@
     "clean": "rm -rf dist",
     "dev": "tsup --watch",
     "lint": "eslint \"./**/*.ts*\"",
-    "test": "vitest --run",
-    "test:watch": "vitest",
+    "test": "NODE_OPTIONS='--no-warnings' vitest --run",
+    "test:watch": "NODE_OPTIONS='--no-warnings' vitest",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -31,6 +31,7 @@
     "throttleit": "2.1.0"
   },
   "devDependencies": {
+    "@ai-sdk/test-server": "^1.0.0-beta.1",
     "@solidjs/testing-library": "^0.8.10",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/user-event": "^14.6.1",

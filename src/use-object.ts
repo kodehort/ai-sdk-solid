@@ -10,7 +10,7 @@ import type { z } from 'zod';
 // use function to allow for mocking in tests:
 const getOriginalFetch = () => fetch;
 
-export type Experimental_UseObjectOptions<RESULT> = {
+export type UseObjectOptions<RESULT> = {
   api: string;
   schema: z.ZodType<RESULT>;
   id?: string;
@@ -25,7 +25,7 @@ export type Experimental_UseObjectOptions<RESULT> = {
   credentials?: RequestCredentials;
 };
 
-export type Experimental_UseObjectHelpers<RESULT, INPUT> = {
+export type UseObjectHelpers<RESULT, INPUT> = {
   submit: (input: INPUT) => void;
   readonly object: DeepPartial<RESULT> | undefined;
   readonly error: Error | undefined;
@@ -34,7 +34,7 @@ export type Experimental_UseObjectHelpers<RESULT, INPUT> = {
   clear: () => void;
 };
 
-function useObject<RESULT, INPUT = any>({
+export function useObject<RESULT, INPUT = any>({
   api,
   id,
   schema,
@@ -44,7 +44,7 @@ function useObject<RESULT, INPUT = any>({
   onFinish,
   headers,
   credentials,
-}: Experimental_UseObjectOptions<RESULT>): Experimental_UseObjectHelpers<
+}: UseObjectOptions<RESULT>): UseObjectHelpers<
   RESULT,
   INPUT
 > {
@@ -176,5 +176,3 @@ function useObject<RESULT, INPUT = any>({
     clear,
   };
 }
-
-export const experimental_useObject = useObject;

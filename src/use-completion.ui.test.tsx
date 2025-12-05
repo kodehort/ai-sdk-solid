@@ -1,7 +1,7 @@
 import {
   createTestServer,
   TestResponseController,
-} from './test-utils/test-server';
+} from '@ai-sdk/test-server/with-vitest';
 import '@testing-library/jest-dom/vitest';
 import { screen, waitFor } from '@solidjs/testing-library';
 import userEvent from '@testing-library/user-event';
