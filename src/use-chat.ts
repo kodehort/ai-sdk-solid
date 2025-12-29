@@ -5,6 +5,7 @@ import {
   type UIMessage,
 } from 'ai';
 import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { createStore, reconcile, unwrap } from 'solid-js/store';
 import { Chat } from './chat.solid';
 
 export type { CreateUIMessage, UIMessage };
@@ -96,6 +97,8 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
   options: UseChatOptions<UI_MESSAGE> = {},
 ): UseChatHelpers<UI_MESSAGE> {
   const { throttle: throttleWaitMs, resume = false, ...rest } = options;
+  const cloneMessages = (ms: UI_MESSAGE[]) =>
+    structuredClone(ms);
 
   // Create the chat instance
   const getInitialChat = (): Chat<UI_MESSAGE> => {
@@ -113,8 +116,8 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
   let lastChatRef = 'chat' in rest ? rest.chat : null;
 
   // Create signals for reactive state
-  const [messages, setMessagesSignal] = createSignal<UI_MESSAGE[]>(
-    chatInstance.messages,
+  const [messages, setMessagesStore] = createStore<UI_MESSAGE[]>(
+    cloneMessages(chatInstance.messages),
   );
   const [status, setStatus] = createSignal<AbstractChat<UI_MESSAGE>['status']>(
     chatInstance.status,
@@ -136,7 +139,12 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
       lastChatRef = currentChatRef;
 
       // Update signals with new chat state
-      setMessagesSignal(chatInstance.messages);
+      setMessagesStore(
+        reconcile(
+          cloneMessages(chatInstance.messages),
+          { key: "id" }
+        )
+      );
       setStatus(chatInstance.status);
       setError(chatInstance.error);
     }
@@ -150,7 +158,12 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
 
     // Subscribe to messages changes
     const unsubscribeMessages = chat['~registerMessagesCallback'](() => {
-      setMessagesSignal([...chat.messages]);
+      setMessagesStore(
+        reconcile(
+          cloneMessages(chat.messages),
+          { key: "id" }
+        )
+      );
     }, throttleWaitMs);
 
     // Subscribe to status changes
@@ -179,13 +192,19 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
 
   // setMessages function
   const setMessages = (
-    messagesParam: UI_MESSAGE[] | ((messages: UI_MESSAGE[]) => UI_MESSAGE[]),
+    messagesParam:
+      | UI_MESSAGE[]
+      | ((messages: UI_MESSAGE[]) => UI_MESSAGE[]),
   ) => {
     const chat = getChat();
-    if (typeof messagesParam === 'function') {
-      messagesParam = messagesParam(chat.messages);
-    }
-    chat.messages = messagesParam;
+    const next =
+      typeof messagesParam === "function"
+        ? messagesParam(chat.messages)
+        : messagesParam;
+    const plain = unwrap(next) as UI_MESSAGE[];
+
+    chat.messages = plain;
+    setMessagesStore(reconcile(cloneMessages(plain), { key: "id" }));
   };
 
   return {
@@ -195,7 +214,7 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
     get messages() {
       // Trigger reactivity check for chat recreation
       getChat();
-      return messages();
+      return messages;
     },
     setMessages,
     get sendMessage() {

@@ -383,6 +383,160 @@ describe('data protocol stream', () => {
   });
 });
 
+describe('streaming text delta reactivity', () => {
+  let chatRef: Chat<UIMessage>;
+
+  setupTestComponent(() => {
+    const chat = new Chat({ generateId: mockId() });
+    chatRef = chat;
+    const helpers = useChat({ chat });
+
+    return (
+      <div>
+        <div data-testid="status">{helpers.status}</div>
+        <For each={helpers.messages}>
+          {m => (
+            <div data-testid={`msg-${m.role}`}>
+              <For each={m.parts}>
+                {p => <span>{p.type === 'text' ? p.text : ''}</span>}
+              </For>
+            </div>
+          )}
+        </For>
+        <button
+          data-testid="send"
+          onClick={() =>
+            helpers.sendMessage({ parts: [{ text: 'hi', type: 'text' }] })
+          }
+        />
+      </div>
+    );
+  });
+
+  it('should trigger reactivity for each text delta', async () => {
+    const controller = new TestResponseController();
+    server.urls['/api/chat'].response = {
+      type: 'controlled-stream',
+      controller,
+    };
+
+    await userEvent.click(screen.getByTestId('send'));
+
+    controller.write(formatChunk({ type: 'text-start', id: '0' }));
+    controller.write(
+      formatChunk({ type: 'text-delta', id: '0', delta: 'A' }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('msg-assistant')).toHaveTextContent('A');
+    });
+
+    controller.write(
+      formatChunk({ type: 'text-delta', id: '0', delta: 'B' }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('msg-assistant')).toHaveTextContent('AB');
+    });
+
+    controller.write(
+      formatChunk({ type: 'text-delta', id: '0', delta: 'C' }),
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('msg-assistant')).toHaveTextContent('ABC');
+    });
+
+    controller.write(formatChunk({ type: 'text-end', id: '0' }));
+    controller.close();
+  });
+});
+
+describe('message reference isolation', () => {
+  let chatRef: Chat<UIMessage>;
+  let getStoreMessages: () => UIMessage[];
+
+  setupTestComponent(() => {
+    const chat = new Chat({ generateId: mockId() });
+    chatRef = chat;
+    const helpers = useChat({ chat });
+    getStoreMessages = () => helpers.messages;
+
+    return (
+      <div>
+        <div data-testid="status">{helpers.status}</div>
+        <div data-testid="messages">{JSON.stringify(helpers.messages)}</div>
+        <For each={helpers.messages}>
+          {(m, idx) => (
+            <div data-testid={`msg-${idx()}`}>
+              {m.parts
+                .map(p => (p.type === 'text' ? p.text : ''))
+                .join('')}
+            </div>
+          )}
+        </For>
+        <button
+          data-testid="send"
+          onClick={() =>
+            helpers.sendMessage({ parts: [{ text: 'hi', type: 'text' }] })
+          }
+        />
+      </div>
+    );
+  });
+
+  it('should clone messages to prevent shared references', async () => {
+    server.urls['/api/chat'].response = {
+      type: 'stream-chunks',
+      chunks: [
+        formatChunk({ type: 'text-start', id: '0' }),
+        formatChunk({ type: 'text-delta', id: '0', delta: 'Hello' }),
+        formatChunk({ type: 'text-end', id: '0' }),
+      ],
+    };
+
+    await userEvent.click(screen.getByTestId('send'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('status')).toHaveTextContent('ready');
+    });
+
+    const storeMessages = getStoreMessages();
+    const instanceMessages = chatRef.messages;
+
+    // Arrays must be different references
+    expect(storeMessages).not.toBe(instanceMessages);
+    // Message objects must be different references
+    expect(storeMessages[0]).not.toBe(instanceMessages[0]);
+    expect(storeMessages[1]).not.toBe(instanceMessages[1]);
+    // Parts arrays must be different references
+    expect(storeMessages[1].parts).not.toBe(instanceMessages[1].parts);
+  });
+
+  it('should not reflect external mutations to chat instance', async () => {
+    server.urls['/api/chat'].response = {
+      type: 'stream-chunks',
+      chunks: [
+        formatChunk({ type: 'text-start', id: '0' }),
+        formatChunk({ type: 'text-delta', id: '0', delta: 'Original' }),
+        formatChunk({ type: 'text-end', id: '0' }),
+      ],
+    };
+
+    await userEvent.click(screen.getByTestId('send'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('msg-1')).toHaveTextContent('Original');
+    });
+
+    // Simulate SDK in-place mutation (the bug scenario)
+    (chatRef.messages[1].parts[0] as any).text = 'MUTATED';
+
+    // Store should still show original (cloned, isolated)
+    expect(screen.getByTestId('msg-1')).toHaveTextContent('Original');
+  });
+});
+
 describe('text stream', () => {
   let onFinishCalls: Array<{
     message: UIMessage;
