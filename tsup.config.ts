@@ -1,10 +1,10 @@
-import { defineConfig } from 'tsup';
-import { parsePresetOptions, generateTsupOptions } from 'tsup-preset-solid';
+import { defineConfig } from "tsup";
+import { generateTsupOptions, parsePresetOptions } from "tsup-preset-solid";
 
 const parsedOptions = parsePresetOptions({
   entries: [
     {
-      entry: 'src/index.ts',
+      entry: "src/index.ts",
     },
   ],
 });

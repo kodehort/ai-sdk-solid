@@ -1,5 +1,5 @@
-import { isDeepEqualData } from 'ai';
-import { createEffect, createSignal } from 'solid-js';
+import { isDeepEqualData } from "ai";
+import { createEffect, createSignal } from "solid-js";
 
 /**
  * Returns a stable value that only updates the stored value (and triggers a re-render)

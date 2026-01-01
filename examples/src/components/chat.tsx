@@ -1,42 +1,46 @@
-import { createSignal, For, Show } from 'solid-js';
-import { useChat } from 'ai-sdk-solid';
+import { useChat } from "ai-sdk-solid";
+import { createSignal, For, Show } from "solid-js";
 
 export default function Chat() {
-  const [input, setInput] = createSignal('');
+  const [input, setInput] = createSignal("");
   const chat = useChat();
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
     const content = input().trim();
-    if (!content) return;
+    if (!content) {
+      return;
+    }
 
-    setInput('');
+    setInput("");
     await chat.sendMessage({ text: content });
   };
 
   return (
-    <div class="flex flex-col h-[500px]">
-      <div class="flex-1 overflow-y-auto space-y-4 mb-4">
+    <div class="flex h-[500px] flex-col">
+      <div class="mb-4 flex-1 space-y-4 overflow-y-auto">
         <Show when={chat.messages.length === 0}>
-          <p class="text-gray-500 text-center py-8">Send a message to start</p>
+          <p class="py-8 text-center text-gray-500">Send a message to start</p>
         </Show>
 
         <For each={chat.messages}>
-          {message => (
+          {(message) => (
             <div
-              class={`p-3 rounded-lg ${
-                message.role === 'user'
-                  ? 'bg-blue-100 ml-8'
-                  : 'bg-gray-100 mr-8'
+              class={`rounded-lg p-3 ${
+                message.role === "user"
+                  ? "ml-8 bg-blue-100"
+                  : "mr-8 bg-gray-100"
               }`}
             >
-              <div class="text-xs text-gray-500 mb-1">
-                {message.role === 'user' ? 'You' : 'Assistant'}
+              <div class="mb-1 text-gray-500 text-xs">
+                {message.role === "user" ? "You" : "Assistant"}
               </div>
               <For each={message.parts}>
-                {part => (
-                  <Show when={part.type === 'text'}>
-                    <p class="whitespace-pre-wrap">{(part as { type: 'text'; text: string }).text}</p>
+                {(part) => (
+                  <Show when={part.type === "text"}>
+                    <p class="whitespace-pre-wrap">
+                      {(part as { type: "text"; text: string }).text}
+                    </p>
                   </Show>
                 )}
               </For>
@@ -44,42 +48,42 @@ export default function Chat() {
           )}
         </For>
 
-        <Show when={chat.status === 'streaming'}>
-          <div class="text-gray-500 animate-pulse">Typing...</div>
+        <Show when={chat.status === "streaming"}>
+          <div class="animate-pulse text-gray-500">Typing...</div>
         </Show>
       </div>
 
       <Show when={chat.error}>
-        <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+        <div class="mb-4 rounded bg-red-100 p-3 text-red-700">
           Error: {chat.error?.message}
         </div>
       </Show>
 
-      <form onSubmit={handleSubmit} class="flex gap-2">
+      <form class="flex gap-2" onSubmit={handleSubmit}>
         <input
+          class="flex-1 rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={chat.status === "streaming"}
+          onInput={(e) => setInput(e.currentTarget.value)}
+          placeholder="Type a message..."
           type="text"
           value={input()}
-          onInput={e => setInput(e.currentTarget.value)}
-          placeholder="Type a message..."
-          class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={chat.status === 'streaming'}
         />
         <Show
-          when={chat.status !== 'streaming'}
           fallback={
             <button
-              type="button"
+              class="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
               onClick={() => chat.stop()}
-              class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+              type="button"
             >
               Stop
             </button>
           }
+          when={chat.status !== "streaming"}
         >
           <button
-            type="submit"
-            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+            class="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
             disabled={!input().trim()}
+            type="submit"
           >
             Send
           </button>

@@ -1,20 +1,20 @@
 import {
-  CompletionRequestOptions,
-  UseCompletionOptions,
+  type CompletionRequestOptions,
   callCompletionApi,
-} from 'ai';
-import { createSignal, createEffect, onCleanup } from 'solid-js';
-import { throttle } from './throttle';
+  type UseCompletionOptions,
+} from "ai";
+import { createEffect, createSignal } from "solid-js";
+import { throttle } from "./throttle";
 
-export type { UseCompletionOptions };
+export type { UseCompletionOptions } from "ai";
 
-export type UseCompletionHelpers = {
+export interface UseCompletionHelpers {
   /** The current completion text */
   readonly completion: string;
   /** Send a new prompt to the API */
   complete: (
     prompt: string,
-    options?: CompletionRequestOptions,
+    options?: CompletionRequestOptions
   ) => Promise<string | null | undefined>;
   /** The current error, if any */
   readonly error: undefined | Error;
@@ -28,28 +28,28 @@ export type UseCompletionHelpers = {
   setInput: (value: string | ((prev: string) => string)) => void;
   /** Handle input change events */
   handleInputChange: (
-    event: Event & { currentTarget: HTMLInputElement | HTMLTextAreaElement },
+    event: Event & { currentTarget: HTMLInputElement | HTMLTextAreaElement }
   ) => void;
   /** Handle form submission */
   handleSubmit: (event?: { preventDefault?: () => void }) => void;
   /** Whether a request is currently in progress */
   readonly isLoading: boolean;
-};
+}
 
 export function useCompletion(
   options: UseCompletionOptions & {
     experimental_throttle?: number;
-  } = {},
+  } = {}
 ): UseCompletionHelpers {
   const {
-    api = '/api/completion',
-    id,
-    initialCompletion = '',
-    initialInput = '',
+    api = "/api/completion",
+    id: _id,
+    initialCompletion = "",
+    initialInput = "",
     credentials,
     headers,
     body,
-    streamProtocol = 'data',
+    streamProtocol = "data",
     fetch: fetchFn,
     onFinish,
     onError,
@@ -57,11 +57,13 @@ export function useCompletion(
   } = options;
 
   // Create signals for state management
-  const [completion, setCompletionSignal] = createSignal<string>(initialCompletion);
+  const [completion, setCompletionSignal] =
+    createSignal<string>(initialCompletion);
   const [isLoading, setIsLoading] = createSignal<boolean>(false);
   const [error, setError] = createSignal<Error | undefined>(undefined);
   const [input, setInputSignal] = createSignal<string>(initialInput);
-  const [abortController, setAbortController] = createSignal<AbortController | null>(null);
+  const [abortController, setAbortController] =
+    createSignal<AbortController | null>(null);
 
   // Track extra metadata that can change
   let extraMetadata = {
@@ -83,9 +85,9 @@ export function useCompletion(
     setCompletionSignal(newCompletion);
   };
 
-  const triggerRequest = async (
+  const triggerRequest = (
     prompt: string,
-    requestOptions?: CompletionRequestOptions,
+    requestOptions?: CompletionRequestOptions
   ): Promise<string | null | undefined> => {
     return callCompletionApi({
       api,
@@ -100,7 +102,7 @@ export function useCompletion(
       fetch: fetchFn,
       setCompletion: throttle(
         (newCompletion: string) => setCompletionSignal(newCompletion),
-        throttleWaitMs,
+        throttleWaitMs
       ),
       setLoading: setIsLoading,
       setError,
@@ -118,16 +120,16 @@ export function useCompletion(
     }
   };
 
-  const complete = async (
+  const complete = (
     prompt: string,
-    requestOptions?: CompletionRequestOptions,
+    requestOptions?: CompletionRequestOptions
   ): Promise<string | null | undefined> => {
     return triggerRequest(prompt, requestOptions);
   };
 
   const setInput = (value: string | ((prev: string) => string)) => {
-    if (typeof value === 'function') {
-      setInputSignal(prev => value(prev));
+    if (typeof value === "function") {
+      setInputSignal((prev) => value(prev));
     } else {
       setInputSignal(value);
     }
@@ -140,7 +142,7 @@ export function useCompletion(
   };
 
   const handleInputChange = (
-    e: Event & { currentTarget: HTMLInputElement | HTMLTextAreaElement },
+    e: Event & { currentTarget: HTMLInputElement | HTMLTextAreaElement }
   ) => {
     setInputSignal(e.currentTarget.value);
   };

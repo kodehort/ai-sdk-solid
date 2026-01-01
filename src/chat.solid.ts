@@ -1,16 +1,22 @@
-import { AbstractChat, ChatInit, ChatState, ChatStatus, UIMessage } from 'ai';
-import { throttle } from './throttle';
+import {
+  AbstractChat,
+  type ChatInit,
+  type ChatState,
+  type ChatStatus,
+  type UIMessage,
+} from "ai";
+import { throttle } from "./throttle";
 
 class SolidChatState<UI_MESSAGE extends UIMessage>
   implements ChatState<UI_MESSAGE>
 {
   #messages: UI_MESSAGE[];
-  #status: ChatStatus = 'ready';
+  #status: ChatStatus = "ready";
   #error: Error | undefined = undefined;
 
-  #messagesCallbacks = new Set<() => void>();
-  #statusCallbacks = new Set<() => void>();
-  #errorCallbacks = new Set<() => void>();
+  readonly #messagesCallbacks = new Set<() => void>();
+  readonly #statusCallbacks = new Set<() => void>();
+  readonly #errorCallbacks = new Set<() => void>();
 
   constructor(initialMessages: UI_MESSAGE[] = []) {
     this.#messages = initialMessages;
@@ -64,9 +70,9 @@ class SolidChatState<UI_MESSAGE extends UIMessage>
 
   snapshot = <T>(value: T): T => structuredClone(value);
 
-  '~registerMessagesCallback' = (
+  "~registerMessagesCallback" = (
     onChange: () => void,
-    throttleWaitMs?: number,
+    throttleWaitMs?: number
   ): (() => void) => {
     const callback = throttleWaitMs
       ? throttle(onChange, throttleWaitMs)
@@ -77,37 +83,43 @@ class SolidChatState<UI_MESSAGE extends UIMessage>
     };
   };
 
-  '~registerStatusCallback' = (onChange: () => void): (() => void) => {
+  "~registerStatusCallback" = (onChange: () => void): (() => void) => {
     this.#statusCallbacks.add(onChange);
     return () => {
       this.#statusCallbacks.delete(onChange);
     };
   };
 
-  '~registerErrorCallback' = (onChange: () => void): (() => void) => {
+  "~registerErrorCallback" = (onChange: () => void): (() => void) => {
     this.#errorCallbacks.add(onChange);
     return () => {
       this.#errorCallbacks.delete(onChange);
     };
   };
 
-  #callMessagesCallbacks = () => {
-    this.#messagesCallbacks.forEach(callback => callback());
+  readonly #callMessagesCallbacks = () => {
+    for (const callback of this.#messagesCallbacks) {
+      callback();
+    }
   };
 
-  #callStatusCallbacks = () => {
-    this.#statusCallbacks.forEach(callback => callback());
+  readonly #callStatusCallbacks = () => {
+    for (const callback of this.#statusCallbacks) {
+      callback();
+    }
   };
 
-  #callErrorCallbacks = () => {
-    this.#errorCallbacks.forEach(callback => callback());
+  readonly #callErrorCallbacks = () => {
+    for (const callback of this.#errorCallbacks) {
+      callback();
+    }
   };
 }
 
 export class Chat<
   UI_MESSAGE extends UIMessage,
 > extends AbstractChat<UI_MESSAGE> {
-  #state: SolidChatState<UI_MESSAGE>;
+  readonly #state: SolidChatState<UI_MESSAGE>;
 
   constructor({ messages, ...init }: ChatInit<UI_MESSAGE>) {
     const state = new SolidChatState(messages);
@@ -115,15 +127,15 @@ export class Chat<
     this.#state = state;
   }
 
-  '~registerMessagesCallback' = (
+  "~registerMessagesCallback" = (
     onChange: () => void,
-    throttleWaitMs?: number,
+    throttleWaitMs?: number
   ): (() => void) =>
-    this.#state['~registerMessagesCallback'](onChange, throttleWaitMs);
+    this.#state["~registerMessagesCallback"](onChange, throttleWaitMs);
 
-  '~registerStatusCallback' = (onChange: () => void): (() => void) =>
-    this.#state['~registerStatusCallback'](onChange);
+  "~registerStatusCallback" = (onChange: () => void): (() => void) =>
+    this.#state["~registerStatusCallback"](onChange);
 
-  '~registerErrorCallback' = (onChange: () => void): (() => void) =>
-    this.#state['~registerErrorCallback'](onChange);
+  "~registerErrorCallback" = (onChange: () => void): (() => void) =>
+    this.#state["~registerErrorCallback"](onChange);
 }

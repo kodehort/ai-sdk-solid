@@ -1,38 +1,38 @@
-import { Show } from 'solid-js';
-import { useCompletion } from 'ai-sdk-solid';
+import { useCompletion } from "ai-sdk-solid";
+import { Show } from "solid-js";
 
 export default function Completion() {
-  const completion = useCompletion({ api: '/api/completion' });
+  const completion = useCompletion({ api: "/api/completion" });
 
   return (
     <div class="space-y-4">
-      <form onSubmit={completion.handleSubmit} class="space-y-4">
+      <form class="space-y-4" onSubmit={completion.handleSubmit}>
         <textarea
-          value={completion.input}
+          class="w-full resize-none rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={completion.isLoading}
           onInput={completion.handleInputChange}
           placeholder="Enter a prompt..."
           rows={4}
-          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-          disabled={completion.isLoading}
+          value={completion.input}
         />
 
         <div class="flex gap-2">
           <Show
-            when={!completion.isLoading}
             fallback={
               <button
-                type="button"
+                class="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
                 onClick={() => completion.stop()}
-                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                type="button"
               >
                 Stop
               </button>
             }
+            when={!completion.isLoading}
           >
             <button
-              type="submit"
-              class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+              class="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
               disabled={!completion.input.trim()}
+              type="submit"
             >
               Generate
             </button>
@@ -41,14 +41,14 @@ export default function Completion() {
       </form>
 
       <Show when={completion.error}>
-        <div class="bg-red-100 text-red-700 p-3 rounded">
+        <div class="rounded bg-red-100 p-3 text-red-700">
           Error: {completion.error?.message}
         </div>
       </Show>
 
       <Show when={completion.completion}>
-        <div class="bg-gray-50 p-4 rounded-lg">
-          <h3 class="text-sm font-medium text-gray-500 mb-2">Result:</h3>
+        <div class="rounded-lg bg-gray-50 p-4">
+          <h3 class="mb-2 font-medium text-gray-500 text-sm">Result:</h3>
           <p class="whitespace-pre-wrap">{completion.completion}</p>
         </div>
       </Show>
