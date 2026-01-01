@@ -11,7 +11,18 @@ permissions:
   id-token: write
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: bun run test
+
   release:
+    needs: test
     runs-on: ubuntu-latest
     if: github.repository == 'kodehort/ai-sdk-solid'
     steps:
@@ -21,10 +32,8 @@ jobs:
           persist-credentials: false
 
       - uses: oven-sh/setup-bun@v2
-
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: bun run test
 
       - uses: actions/setup-node@v4
         with:
