@@ -1,5 +1,5 @@
 {
-  "name": "ai-dsk-solid",
+  "name": "@kodehort/ai-sdk-solid",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "type": "module",
@@ -31,12 +31,14 @@
   },
   "devDependencies": {
     "@ai-sdk/test-server": "^1.0.0-beta.1",
+    "@semantic-release/github": "^12.0.2",
     "@solidjs/testing-library": "^0.8.10",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.10.1",
     "jsdom": "^27.2.0",
     "msw": "^2.12.4",
+    "semantic-release": "^25.0.2",
     "solid-js": "^1.9.7",
     "tsup": "^8.5.0",
     "tsup-preset-solid": "^2.2.0",
@@ -52,6 +54,7 @@
     "node": ">=18"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }
