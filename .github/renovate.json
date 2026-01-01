@@ -8,7 +8,6 @@
     ":automergeTypes",
     ":rebaseStalePrs",
     "group:linters",
-    "group:postcss",
     "group:recommended",
     "group:test",
     "customManagers:biomeVersions"
