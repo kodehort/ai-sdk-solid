@@ -55,7 +55,7 @@
     "@solidjs/testing-library": "^0.8.10",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^24.10.1",
+    "@types/node": "^25.0.0",
     "jsdom": "^27.2.0",
     "msw": "^2.12.4",
     "semantic-release": "^25.0.2",
