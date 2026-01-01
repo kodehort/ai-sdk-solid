@@ -1,16 +1,21 @@
 import {
-  FetchFunction,
+  type FetchFunction,
   isAbortError,
   safeValidateTypes,
-} from '@ai-sdk/provider-utils';
-import { asSchema, DeepPartial, isDeepEqualData, parsePartialJson } from 'ai';
-import { createSignal } from 'solid-js';
-import type { z } from 'zod';
+} from "@ai-sdk/provider-utils";
+import {
+  asSchema,
+  type DeepPartial,
+  isDeepEqualData,
+  parsePartialJson,
+} from "ai";
+import { createSignal } from "solid-js";
+import type { z } from "zod";
 
 // use function to allow for mocking in tests:
 const getOriginalFetch = () => fetch;
 
-export type UseObjectOptions<RESULT> = {
+export interface UseObjectOptions<RESULT> {
   api: string;
   schema: z.ZodType<RESULT>;
   id?: string;
@@ -23,20 +28,20 @@ export type UseObjectOptions<RESULT> = {
   onError?: (error: Error) => void;
   headers?: Record<string, string> | Headers;
   credentials?: RequestCredentials;
-};
+}
 
-export type UseObjectHelpers<RESULT, INPUT> = {
+export interface UseObjectHelpers<RESULT, INPUT> {
   submit: (input: INPUT) => void;
   readonly object: DeepPartial<RESULT> | undefined;
   readonly error: Error | undefined;
   readonly isLoading: boolean;
   stop: () => void;
   clear: () => void;
-};
+}
 
-export function useObject<RESULT, INPUT = any>({
+export function useObject<RESULT, INPUT = unknown>({
   api,
-  id,
+  id: _id,
   schema,
   initialValue,
   fetch: fetchFn,
@@ -44,12 +49,9 @@ export function useObject<RESULT, INPUT = any>({
   onFinish,
   headers,
   credentials,
-}: UseObjectOptions<RESULT>): UseObjectHelpers<
-  RESULT,
-  INPUT
-> {
+}: UseObjectOptions<RESULT>): UseObjectHelpers<RESULT, INPUT> {
   const [object, setObject] = createSignal<DeepPartial<RESULT> | undefined>(
-    initialValue,
+    initialValue
   );
   const [error, setError] = createSignal<Error | undefined>(undefined);
   const [isLoading, setIsLoading] = createSignal<boolean>(false);
@@ -59,7 +61,7 @@ export function useObject<RESULT, INPUT = any>({
   const stop = () => {
     try {
       abortControllerRef?.abort();
-    } catch (ignored) {
+    } catch (_ignored) {
       // Ignore abort errors
     } finally {
       setIsLoading(false);
@@ -89,9 +91,9 @@ export function useObject<RESULT, INPUT = any>({
 
       const actualFetch = fetchFn ?? getOriginalFetch();
       const response = await actualFetch(api, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...(headers instanceof Headers
             ? Object.fromEntries(headers.entries())
             : headers),
@@ -103,16 +105,16 @@ export function useObject<RESULT, INPUT = any>({
 
       if (!response.ok) {
         throw new Error(
-          (await response.text()) ?? 'Failed to fetch the response.',
+          (await response.text()) ?? "Failed to fetch the response."
         );
       }
 
       if (response.body == null) {
-        throw new Error('The response body is empty.');
+        throw new Error("The response body is empty.");
       }
 
-      let accumulatedText = '';
-      let latestObject: DeepPartial<RESULT> | undefined = undefined;
+      let accumulatedText = "";
+      let latestObject: DeepPartial<RESULT> | undefined;
 
       await response.body.pipeThrough(new TextDecoderStream()).pipeTo(
         new WritableStream<string>({
@@ -140,12 +142,15 @@ export function useObject<RESULT, INPUT = any>({
 
               onFinish(
                 validationResult.success
-                  ? { object: validationResult.value as RESULT, error: undefined }
-                  : { object: undefined, error: validationResult.error },
+                  ? {
+                      object: validationResult.value as RESULT,
+                      error: undefined,
+                    }
+                  : { object: undefined, error: validationResult.error }
               );
             }
           },
-        }),
+        })
       );
     } catch (err) {
       if (isAbortError(err)) {

@@ -1,16 +1,11 @@
-import {
-  AbstractChat,
-  ChatInit,
-  type CreateUIMessage,
-  type UIMessage,
-} from 'ai';
-import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
-import { createStore, reconcile, unwrap } from 'solid-js/store';
-import { Chat } from './chat.solid';
+import type { AbstractChat, ChatInit, UIMessage } from "ai";
+import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
+import { createStore, reconcile, unwrap } from "solid-js/store";
+import { Chat } from "./chat.solid";
 
-export type { CreateUIMessage, UIMessage };
+export type { CreateUIMessage, UIMessage } from "ai";
 
-export type UseChatHelpers<UI_MESSAGE extends UIMessage> = {
+export interface UseChatHelpers<UI_MESSAGE extends UIMessage> {
   /**
    * The id of the chat.
    */
@@ -27,7 +22,7 @@ export type UseChatHelpers<UI_MESSAGE extends UIMessage> = {
    * manually to regenerate the AI response.
    */
   setMessages: (
-    messages: UI_MESSAGE[] | ((messages: UI_MESSAGE[]) => UI_MESSAGE[]),
+    messages: UI_MESSAGE[] | ((messages: UI_MESSAGE[]) => UI_MESSAGE[])
   ) => void;
 
   /**
@@ -38,44 +33,44 @@ export type UseChatHelpers<UI_MESSAGE extends UIMessage> = {
   /**
    * The current status of the chat.
    */
-  readonly status: AbstractChat<UI_MESSAGE>['status'];
+  readonly status: AbstractChat<UI_MESSAGE>["status"];
 
   /**
    * Send a message to the chat.
    */
-  sendMessage: AbstractChat<UI_MESSAGE>['sendMessage'];
+  sendMessage: AbstractChat<UI_MESSAGE>["sendMessage"];
 
   /**
    * Regenerate the last assistant message.
    */
-  regenerate: AbstractChat<UI_MESSAGE>['regenerate'];
+  regenerate: AbstractChat<UI_MESSAGE>["regenerate"];
 
   /**
    * Stop the current streaming response.
    */
-  stop: AbstractChat<UI_MESSAGE>['stop'];
+  stop: AbstractChat<UI_MESSAGE>["stop"];
 
   /**
    * Resume an interrupted stream.
    */
-  resumeStream: AbstractChat<UI_MESSAGE>['resumeStream'];
+  resumeStream: AbstractChat<UI_MESSAGE>["resumeStream"];
 
   /**
    * Clear the current error.
    */
-  clearError: AbstractChat<UI_MESSAGE>['clearError'];
+  clearError: AbstractChat<UI_MESSAGE>["clearError"];
 
   /**
    * Add a tool result to the chat.
    * @deprecated Use `addToolOutput` instead.
    */
-  addToolResult: AbstractChat<UI_MESSAGE>['addToolOutput'];
+  addToolResult: AbstractChat<UI_MESSAGE>["addToolOutput"];
 
   /**
    * Add a tool output to the chat.
    */
-  addToolOutput: AbstractChat<UI_MESSAGE>['addToolOutput'];
-};
+  addToolOutput: AbstractChat<UI_MESSAGE>["addToolOutput"];
+}
 
 export type UseChatOptions<UI_MESSAGE extends UIMessage> = (
   | { chat: Chat<UI_MESSAGE> }
@@ -94,15 +89,14 @@ export type UseChatOptions<UI_MESSAGE extends UIMessage> = (
 };
 
 export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
-  options: UseChatOptions<UI_MESSAGE> = {},
+  options: UseChatOptions<UI_MESSAGE> = {}
 ): UseChatHelpers<UI_MESSAGE> {
   const { throttle: throttleWaitMs, resume = false, ...rest } = options;
-  const cloneMessages = (ms: UI_MESSAGE[]) =>
-    structuredClone(ms);
+  const cloneMessages = (ms: UI_MESSAGE[]) => structuredClone(ms);
 
   // Create the chat instance
   const getInitialChat = (): Chat<UI_MESSAGE> => {
-    if ('chat' in rest) {
+    if ("chat" in rest) {
       return rest.chat;
     }
     return new Chat(rest);
@@ -111,23 +105,23 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
   let chatInstance = getInitialChat();
 
   // Track options for recreation
-  const getOptionsId = () => ('id' in rest ? rest.id : null);
+  const getOptionsId = () => ("id" in rest ? rest.id : null);
   let lastOptionsId = getOptionsId();
-  let lastChatRef = 'chat' in rest ? rest.chat : null;
+  let lastChatRef = "chat" in rest ? rest.chat : null;
 
   // Create signals for reactive state
   const [messages, setMessagesStore] = createStore<UI_MESSAGE[]>(
-    cloneMessages(chatInstance.messages),
+    cloneMessages(chatInstance.messages)
   );
-  const [status, setStatus] = createSignal<AbstractChat<UI_MESSAGE>['status']>(
-    chatInstance.status,
+  const [status, setStatus] = createSignal<AbstractChat<UI_MESSAGE>["status"]>(
+    chatInstance.status
   );
   const [error, setError] = createSignal<Error | undefined>(chatInstance.error);
 
   // Function to get current chat (handles recreation)
   const getChat = (): Chat<UI_MESSAGE> => {
     const currentOptionsId = getOptionsId();
-    const currentChatRef = 'chat' in rest ? rest.chat : null;
+    const currentChatRef = "chat" in rest ? rest.chat : null;
 
     const shouldRecreate =
       (currentChatRef !== null && currentChatRef !== lastChatRef) ||
@@ -140,10 +134,7 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
 
       // Update signals with new chat state
       setMessagesStore(
-        reconcile(
-          cloneMessages(chatInstance.messages),
-          { key: "id" }
-        )
+        reconcile(cloneMessages(chatInstance.messages), { key: "id" })
       );
       setStatus(chatInstance.status);
       setError(chatInstance.error);
@@ -157,22 +148,17 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
     const chat = getChat();
 
     // Subscribe to messages changes
-    const unsubscribeMessages = chat['~registerMessagesCallback'](() => {
-      setMessagesStore(
-        reconcile(
-          cloneMessages(chat.messages),
-          { key: "id" }
-        )
-      );
+    const unsubscribeMessages = chat["~registerMessagesCallback"](() => {
+      setMessagesStore(reconcile(cloneMessages(chat.messages), { key: "id" }));
     }, throttleWaitMs);
 
     // Subscribe to status changes
-    const unsubscribeStatus = chat['~registerStatusCallback'](() => {
+    const unsubscribeStatus = chat["~registerStatusCallback"](() => {
       setStatus(chat.status);
     });
 
     // Subscribe to error changes
-    const unsubscribeError = chat['~registerErrorCallback'](() => {
+    const unsubscribeError = chat["~registerErrorCallback"](() => {
       setError(chat.error);
     });
 
@@ -192,9 +178,7 @@ export function useChat<UI_MESSAGE extends UIMessage = UIMessage>(
 
   // setMessages function
   const setMessages = (
-    messagesParam:
-      | UI_MESSAGE[]
-      | ((messages: UI_MESSAGE[]) => UI_MESSAGE[]),
+    messagesParam: UI_MESSAGE[] | ((messages: UI_MESSAGE[]) => UI_MESSAGE[])
   ) => {
     const chat = getChat();
     const next =

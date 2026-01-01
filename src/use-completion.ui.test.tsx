@@ -1,24 +1,24 @@
 import {
   createTestServer,
   TestResponseController,
-} from '@ai-sdk/test-server/with-vitest';
-import '@testing-library/jest-dom/vitest';
-import { screen, waitFor } from '@solidjs/testing-library';
-import userEvent from '@testing-library/user-event';
-import { UIMessageChunk } from 'ai';
-import { setupTestComponent } from './setup-test-component';
-import { useCompletion } from './use-completion';
-import { describe, it, expect, beforeEach } from 'vitest';
+} from "@ai-sdk/test-server/with-vitest";
+import "@testing-library/jest-dom/vitest";
+import { screen, waitFor } from "@solidjs/testing-library";
+import userEvent from "@testing-library/user-event";
+import type { UIMessageChunk } from "ai";
+import { beforeEach, describe, expect, it } from "vitest";
+import { setupTestComponent } from "./setup-test-component";
+import { useCompletion } from "./use-completion";
 
 function formatChunk(part: UIMessageChunk) {
   return `data: ${JSON.stringify(part)}\n\n`;
 }
 
 const server = createTestServer({
-  '/api/completion': {},
+  "/api/completion": {},
 });
 
-describe('stream data stream', () => {
+describe("stream data stream", () => {
   let onFinishResult: { prompt: string; completion: string } | undefined;
 
   setupTestComponent(() => {
@@ -36,9 +36,9 @@ describe('stream data stream', () => {
         <form onSubmit={completion.handleSubmit}>
           <input
             data-testid="input"
-            value={completion.input}
-            placeholder="Say something..."
             onInput={completion.handleInputChange}
+            placeholder="Say something..."
+            value={completion.input}
           />
         </form>
       </div>
@@ -49,24 +49,24 @@ describe('stream data stream', () => {
     onFinishResult = undefined;
   });
 
-  describe('render simple stream', () => {
+  describe("render simple stream", () => {
     beforeEach(async () => {
-      server.urls['/api/completion'].response = {
-        type: 'stream-chunks',
+      server.urls["/api/completion"].response = {
+        type: "stream-chunks",
         chunks: [
-          formatChunk({ type: 'text-delta', id: '0', delta: 'Hello' }),
-          formatChunk({ type: 'text-delta', id: '0', delta: ',' }),
-          formatChunk({ type: 'text-delta', id: '0', delta: ' world' }),
-          formatChunk({ type: 'text-delta', id: '0', delta: '.' }),
+          formatChunk({ type: "text-delta", id: "0", delta: "Hello" }),
+          formatChunk({ type: "text-delta", id: "0", delta: "," }),
+          formatChunk({ type: "text-delta", id: "0", delta: " world" }),
+          formatChunk({ type: "text-delta", id: "0", delta: "." }),
         ],
       };
-      await userEvent.type(screen.getByTestId('input'), 'hi{enter}');
+      await userEvent.type(screen.getByTestId("input"), "hi{enter}");
     });
 
-    it('should render stream', async () => {
+    it("should render stream", async () => {
       await waitFor(() => {
-        expect(screen.getByTestId('completion')).toHaveTextContent(
-          'Hello, world.',
+        expect(screen.getByTestId("completion")).toHaveTextContent(
+          "Hello, world."
         );
       });
     });
@@ -74,57 +74,57 @@ describe('stream data stream', () => {
     it("should call 'onFinish' callback", async () => {
       await waitFor(() => {
         expect(onFinishResult).toEqual({
-          prompt: 'hi',
-          completion: 'Hello, world.',
+          prompt: "hi",
+          completion: "Hello, world.",
         });
       });
     });
   });
 
-  describe('loading state', () => {
-    it('should show loading state', async () => {
+  describe("loading state", () => {
+    it("should show loading state", async () => {
       const controller = new TestResponseController();
 
-      server.urls['/api/completion'].response = {
-        type: 'controlled-stream',
+      server.urls["/api/completion"].response = {
+        type: "controlled-stream",
         controller,
       };
 
-      await userEvent.type(screen.getByTestId('input'), 'hi{enter}');
+      await userEvent.type(screen.getByTestId("input"), "hi{enter}");
 
       controller.write(
-        formatChunk({ type: 'text-delta', id: '0', delta: 'Hello' }),
+        formatChunk({ type: "text-delta", id: "0", delta: "Hello" })
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loading')).toHaveTextContent('true');
+        expect(screen.getByTestId("loading")).toHaveTextContent("true");
       });
 
       await controller.close();
 
       await waitFor(() => {
-        expect(screen.getByTestId('loading')).toHaveTextContent('false');
+        expect(screen.getByTestId("loading")).toHaveTextContent("false");
       });
     });
 
-    it('should reset loading state on error', async () => {
-      server.urls['/api/completion'].response = {
-        type: 'error',
+    it("should reset loading state on error", async () => {
+      server.urls["/api/completion"].response = {
+        type: "error",
         status: 404,
-        body: 'Not found',
+        body: "Not found",
       };
 
-      await userEvent.type(screen.getByTestId('input'), 'hi{enter}');
+      await userEvent.type(screen.getByTestId("input"), "hi{enter}");
 
-      await screen.findByTestId('loading');
-      expect(screen.getByTestId('loading')).toHaveTextContent('false');
+      await screen.findByTestId("loading");
+      expect(screen.getByTestId("loading")).toHaveTextContent("false");
     });
   });
 });
 
-describe('text stream', () => {
+describe("text stream", () => {
   setupTestComponent(() => {
-    const completion = useCompletion({ streamProtocol: 'text' });
+    const completion = useCompletion({ streamProtocol: "text" });
 
     return (
       <div>
@@ -132,26 +132,26 @@ describe('text stream', () => {
         <form onSubmit={completion.handleSubmit}>
           <input
             data-testid="input-text-stream"
-            value={completion.input}
-            placeholder="Say something..."
             onInput={completion.handleInputChange}
+            placeholder="Say something..."
+            value={completion.input}
           />
         </form>
       </div>
     );
   });
 
-  it('should render stream', async () => {
-    server.urls['/api/completion'].response = {
-      type: 'stream-chunks',
-      chunks: ['Hello', ',', ' world', '.'],
+  it("should render stream", async () => {
+    server.urls["/api/completion"].response = {
+      type: "stream-chunks",
+      chunks: ["Hello", ",", " world", "."],
     };
 
-    await userEvent.type(screen.getByTestId('input-text-stream'), 'hi{enter}');
+    await userEvent.type(screen.getByTestId("input-text-stream"), "hi{enter}");
 
     await waitFor(() => {
-      expect(screen.getByTestId('completion-text-stream')).toHaveTextContent(
-        'Hello, world.',
+      expect(screen.getByTestId("completion-text-stream")).toHaveTextContent(
+        "Hello, world."
       );
     });
   });

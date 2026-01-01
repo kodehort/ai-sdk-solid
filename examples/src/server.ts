@@ -1,23 +1,23 @@
-import { serve } from '@hono/node-server';
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import {   convertToModelMessages,
-createUIMessageStreamResponse,
-streamText,
-streamObject,
-validateUIMessages,
-type ModelMessage,
-type UIMessage,
- } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
-import { z } from 'zod';
+import { anthropic } from "@ai-sdk/anthropic";
+import { serve } from "@hono/node-server";
+import {
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+  type ModelMessage,
+  streamObject,
+  streamText,
+  type UIMessage,
+  validateUIMessages,
+} from "ai";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { z } from "zod";
 
 const app = new Hono();
 
-app.use('/*', cors());
+app.use("/*", cors());
 
-
-app.post('/api/chat', async c => {
+app.post("/api/chat", async (c) => {
   const body = await c.req.json();
 
   let messages: UIMessage[];
@@ -27,16 +27,15 @@ app.post('/api/chat', async c => {
       messages: body.messages ?? [],
     });
   } catch (error) {
-    console.log(error)
-    return new Response('Invalid messages', { status: 400 });
+    console.log(error);
+    return new Response("Invalid messages", { status: 400 });
   }
 
-  const modelMessages: ModelMessage[] =
-    convertToModelMessages(messages);
+  const modelMessages: ModelMessage[] = convertToModelMessages(messages);
 
   const streamTextResult = streamText({
-    model: anthropic('claude-3-5-haiku-latest'),
-    messages: modelMessages
+    model: anthropic("claude-3-5-haiku-latest"),
+    messages: modelMessages,
   });
 
   const stream = streamTextResult.toUIMessageStream();
@@ -46,11 +45,11 @@ app.post('/api/chat', async c => {
   });
 });
 
-app.post('/api/completion', async c => {
+app.post("/api/completion", async (c) => {
   const { prompt } = await c.req.json();
 
   const streamTextResult = streamText({
-    model: anthropic('claude-3-5-haiku-latest'),
+    model: anthropic("claude-3-5-haiku-latest"),
     prompt,
   });
 
@@ -62,17 +61,19 @@ app.post('/api/completion', async c => {
 });
 
 const analysisSchema = z.object({
-  title: z.string().describe('A short title for the content'),
-  summary: z.string().describe('A brief summary of the content'),
-  tags: z.array(z.string()).describe('Relevant tags for the content'),
-  sentiment: z.enum(['positive', 'negative', 'neutral']).describe('Overall sentiment'),
+  title: z.string().describe("A short title for the content"),
+  summary: z.string().describe("A brief summary of the content"),
+  tags: z.array(z.string()).describe("Relevant tags for the content"),
+  sentiment: z
+    .enum(["positive", "negative", "neutral"])
+    .describe("Overall sentiment"),
 });
 
-app.post('/api/analyze', async c => {
+app.post("/api/analyze", async (c) => {
   const { content } = await c.req.json();
 
   const result = streamObject({
-    model: anthropic('claude-3-5-haiku-latest'),
+    model: anthropic("claude-3-5-haiku-latest"),
     schema: analysisSchema,
     prompt: `Analyze the following content and extract structured information:\n\n${content}`,
   });
@@ -80,6 +81,6 @@ app.post('/api/analyze', async c => {
   return result.toTextStreamResponse();
 });
 
-serve({ fetch: app.fetch, port: 3000 }, info => {
+serve({ fetch: app.fetch, port: 3000 }, (info) => {
   console.log(`Server running at http://localhost:${info.port}`);
 });
