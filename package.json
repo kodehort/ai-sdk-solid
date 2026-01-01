@@ -6,6 +6,19 @@
     "type": "git",
     "url": "https://github.com/kodehort/ai-sdk-solid"
   },
+  "homepage": "https://github.com/kodehort/ai-sdk-solid#readme",
+  "bugs": {
+    "url": "https://github.com/kodehort/ai-sdk-solid/issues"
+  },
+  "description": "A SolidJS provider for the AI SDK, hooks for @ai-sdk",
+  "keywords": [
+    "typescript",
+    "javascript",
+    "solidjs",
+    "ai-sdk",
+    "ai-sdk-solid",
+    "solidjs-hooks"
+  ],
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
