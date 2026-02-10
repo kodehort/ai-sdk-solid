@@ -63,7 +63,7 @@
     "tsup": "^8.5.0",
     "tsup-preset-solid": "^2.2.0",
     "typescript": "5.9.3",
-    "ultracite": "7.0.11",
+    "ultracite": "7.0.12",
     "vite-plugin-solid": "^2.11.6",
     "vitest": "^4.0.16",
     "zod": "^4.3.4"
